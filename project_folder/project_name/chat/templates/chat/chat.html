@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <script>
+        const roomName = "room_name"; // Replace dynamically
+        const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<p><strong>${data.sender}:</strong> ${data.message}</p>`;
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            socket.send(JSON.stringify({
+                'message': message,
+                'sender': "{{ request.user.username }}",
+                'receiver': "selected_receiver_username" // Replace dynamically
+            }));
+            messageInput.value = '';
+        }
+    </script>
+</head>
+<body>
+    <div>
+        <h1>Chat</h1>
+        <div id="user-list">
+            {% for user in users %}
+                <p>{{ user.username }}</p>
+            {% endfor %}
+        </div>
+        <div id="chat-box"></div>
+        <input id="message-input" type="text">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</body>
+</html>
